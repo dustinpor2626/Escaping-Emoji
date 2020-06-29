@@ -31,7 +31,10 @@ export default class App extends React.Component{
 
 componentDidMount() {
 
-  this.sounds();
+  setInterval(() => {
+    this.sounds();
+  },1000);
+
 }
 
 sounds = async () => {
