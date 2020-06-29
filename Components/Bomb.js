@@ -51,9 +51,8 @@ class Bomb extends React.Component{
 const styles = ({
 
 ball:{
-    height:60,
-    width:60,
-    borderRadius:20,
+    height:70,
+    width:70,
     position:'absolute'
 }
 

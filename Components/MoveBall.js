@@ -5,10 +5,10 @@ import {Dimensions} from 'react-native';
 var width = Dimensions.get('screen').width;
 var height = Dimensions.get('screen').height;
 const dia = 40;
-const bomb_dia = 40;
+const bomb_dia = 60;
 const min_bomb_speed = -3;
 const max_bomb_speed = 3;
-const ball_speed = 2;
+const ball_speed = 5;
 
 const randomCoin = (min,max) => {
 

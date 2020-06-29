@@ -1,16 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View ,Animated, Button,Slider,Dimensions, TouchableOpacity,ImageBackground,Modal} from 'react-native';
+import { StyleSheet, Text, View ,Dimensions, TouchableOpacity,ImageBackground,Modal,Image, Alert,BackHandler,AsyncStorage} from 'react-native';
 import { GameEngine , GameLoop} from "react-native-game-engine";
 import Ball from './Components/Ball.js';
 import MoveBall from './Components/MoveBall.js';
 import Coin from './Components/Coin.js';
 import Bomb from './Components/Bomb.js';
+import { Audio } from 'expo-av';
 
 
-const multiple_in_slider = 10;
-const minus_in_slider = 5;
+
 var width = Dimensions.get('screen').width;
 var height = Dimensions.get('screen').height;
+
+const score = new Audio.Sound();
+const game = new Audio.Sound();
+const start = new Audio.Sound();
+const new_game = new Audio.Sound();
+
+
 
 export default class App extends React.Component{
 
@@ -19,6 +26,44 @@ export default class App extends React.Component{
     start:true,
     stop:false,
     score:0,
+  }
+
+
+componentDidMount() {
+
+  this.sounds();
+}
+
+sounds = async () => {
+
+  await score.loadAsync(require('./Components/sound/coin.mp3'));
+  await game.loadAsync(require('./Components/sound/gaming.mp3'));
+  game.setIsLoopingAsync(true);
+  await start.loadAsync(require('./Components/sound/start.mp3'));
+  await new_game.loadAsync(require('./Components/sound/new_game.mp3'));
+
+}
+
+
+  start = () => {
+    start.playAsync();
+    this.setState({start:false});
+    this.setState({running:true});
+    game.playAsync();
+  }
+
+
+  new_game = () => {
+    new_game.playAsync();
+    this.setState({stop:false});
+    this.setState({score:0});
+    this.setState({start:true});
+    this.engine.swap(this.object());
+  }
+
+
+  quit = () =>{
+      BackHandler.exitApp();
   }
 
 
@@ -62,11 +107,13 @@ event = (e) => {
 
     if(e.type === "game_over"){
       this.setState({running:false});
-      alert('Game Over');
+      this.setState({stop:true});
+      game.stopAsync();
     }
 
     if(e.type === "score"){
-      this.setState(pre => {return {score:pre.score + 1}}  );
+      this.setState(pre => {return {score:pre.score + 1}});
+      score.playAsync();
     }
 }
 
@@ -75,13 +122,65 @@ event = (e) => {
   return (
     <View style={styles.container}> 
 
+
+
     <Modal
         animationType="slide"
         transparent={true}
-      visible={this.state.start}
-    >
-      <View ><Text>hiiiiiii</Text></View>
+      visible={this.state.start} >
+      <View style={{height:'100%',width:'100%',backgroundColor:'white',opacity:0.5}} />
     </Modal>
+
+
+
+    <Modal
+        animationType="slide"
+        transparent={true}
+      visible={this.state.start}>
+      <View style={{top:height/2 - 50,left:width/2-100,height:100,width:200}} >
+      <TouchableOpacity onPress={() => this.start()}>
+            <Image source={require('./Components/img/start.png')}  style={{height:'100%',width:'100%'}}/>
+            </TouchableOpacity>
+      </View>
+    </Modal>
+
+
+
+    <Modal
+        animationType="fade"
+        visible={this.state.stop}>
+
+<ImageBackground source={require('./Components/img/background.jpeg')} style={{height:'100%',width:'100%'}} blurRadius={1} >
+        <View style={{height:'100%',width:'100%',alignItems:'center',justifyContent:'center'}}>
+
+          <View><Text style={{fontSize:40,color:'black'}}>Score</Text></View>
+            <Text style={{fontSize:50,color:'red',marginTop:20,marginBottom:50}}>{this.state.score}</Text>
+           <View >
+            <TouchableOpacity onPress={() => this.new_game()}>
+            <Image source={require('./Components/img/new_game.png')}  style={{height:100,width:200,resizeMode:'contain'}}/>
+            </TouchableOpacity>
+             </View>
+
+             <TouchableOpacity onPress={() => {
+               Alert.alert('Quit Game','Exit From Game',[
+                 {
+                   text:'Ok',
+                   onPress:() => this.quit(),
+                 },
+                 {
+                   text:'cancel',
+                   style:'cancel',
+                 }
+               ])
+               
+               }}>
+             <Text style={{fontSize:30,color:'blue',marginTop:20,fontStyle:'italic',fontWeight:'bold'}}>Quit</Text>
+             </TouchableOpacity>
+
+      </View>
+      </ImageBackground>
+    </Modal>
+
 
         <ImageBackground source={require('./Components/img/background.jpeg')} style={{height:'100%',width:'100%'}} blurRadius={1} >
 
@@ -130,30 +229,6 @@ event = (e) => {
               </TouchableOpacity>
               </ImageBackground>
               </View>
-              
-              {/* <Slider
-              style={styles.vertical_slide}
-                value={this.state.y}
-                minimumTrackTintColor='black'
-                maximumTrackTintColor='black'
-                thumbTintColor='white'
-                 onValueChange= {(value) => {
-                    this.setState({y:value});
-                    this.move_vertical(value);
-                 }} />
-
-      
-      
-                 <Slider
-                 style={styles.horizontal_slide}
-                   value={this.state.x}
-                   minimumTrackTintColor='black'
-                   maximumTrackTintColor='black'
-                   thumbTintColor='white'
-                    onValueChange= {(value) => {
-                       this.setState({x:value});  
-                       this.move_horizontal(value);
-                    }} /> */}
        
        </ImageBackground>
 
@@ -177,55 +252,36 @@ engine:{
   width:'100%',
 },
 
-// vertical_slide:{
-//   transform: [{ rotate: '-90deg' }], 
-//   position:'absolute',
-//   top:height - 100,
-//   left:width/10 - 50  ,
-//   width:100,
-//   height:20,
-//   backgroundColor:'black'
-// },
-
-// horizontal_slide:{
-//  position:'absolute',
-//  top:height - 80,
-//  left:width - 120,
-//  width:100,
-//  height:20,
-//  backgroundColor:'black'
-// },
-
 right:{
-  width:50,
-  height:50,
+  width:60,
+  height:60,
   position:'absolute', 
   top:height - 90,
-  left:width - 60,
+  left:width - 65,
 },
 
 left:{
-  width:50,
-  height:50,
+  width:60,
+  height:60,
   position:'absolute',
   top:height - 90,
-  left:width - 115,
+  left:width - 140,
 },
 
 up:{
-  width:50,
-  height:50,
+  width:60,
+  height:60,
   position:'absolute',
-  top:height - 120,
+  top:height - 130,
   left:10,
 },
 
 down:{
-  width:50,
-  height:50,
+  width:60,
+  height:60,
   position:'absolute',
   top:height - 70,
-  left:60,
+  left:65,
 },
 
 but:{
