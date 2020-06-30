@@ -24,7 +24,7 @@ const MoveBall = (entities, { touches ,events,dispatch}) => {
 
     let ball = entities.ball;
     let coin = entities.coin;
-    let bomb = [entities.bomb1,entities.bomb2,entities.bomb3,entities.bomb4];
+    let bomb = [entities.bomb1,entities.bomb2,entities.bomb3];
 
 
 if(events.length){
@@ -89,7 +89,7 @@ if(ball.position[0] < width && ball.position[0] > 0){
 
 
 
-for(let i = 0 ; i < 4 ;i++){
+for(let i = 0 ; i < 3 ;i++){
 
 
     if(

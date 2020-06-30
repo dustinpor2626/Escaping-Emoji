@@ -31,9 +31,7 @@ export default class App extends React.Component{
 
 componentDidMount() {
 
-  setInterval(() => {
-    this.sounds();
-  },1000);
+ this.sounds();
 
 }
 
@@ -49,7 +47,7 @@ sounds = async () => {
 
 
   start = () => {
-    start.playAsync();
+    start.playFromPositionAsync(0);
     this.setState({start:false});
     this.setState({running:true});
     game.playAsync();
@@ -57,7 +55,7 @@ sounds = async () => {
 
 
   new_game = () => {
-    new_game.playAsync();
+    new_game.playFromPositionAsync(0);
     this.setState({stop:false});
     this.setState({score:0});
     this.setState({start:true});
@@ -98,7 +96,6 @@ object = () => {
     bomb2:{ position:[width - 200,height - 200], xSpeed:this.get_random_speed(), ySpeed:this.get_random_speed(), renderer: <Bomb/>},
     bomb1:{ position:[width - 100,height - 100], xSpeed:this.get_random_speed(), ySpeed:this.get_random_speed(), renderer: <Bomb/>},
     bomb3:{ position:[width - 100,height - 50], xSpeed:this.get_random_speed(), ySpeed:this.get_random_speed(), renderer: <Bomb/>},
-    bomb4:{ position:[width - 100,height - 200], xSpeed:this.get_random_speed(), ySpeed:this.get_random_speed(), renderer: <Bomb/>},
     coin:{ position:[this.randomCoin(5,width - 60),this.randomCoin(15,height - 100)], xSpeed:1, ySpeed:1, renderer: <Coin />},
   }
 
@@ -106,7 +103,7 @@ object = () => {
 }
 
 
-event = (e) => {
+event =async (e) => {
 
     if(e.type === "game_over"){
       this.setState({running:false});
@@ -116,7 +113,7 @@ event = (e) => {
 
     if(e.type === "score"){
       this.setState(pre => {return {score:pre.score + 1}});
-      score.playAsync();
+      score.playFromPositionAsync(0);
     }
 }
 
