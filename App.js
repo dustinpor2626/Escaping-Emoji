@@ -16,7 +16,7 @@ const score = new Audio.Sound();
 const game = new Audio.Sound();
 const start = new Audio.Sound();
 const new_game = new Audio.Sound();
-
+var highest;
 
 
 export default class App extends React.Component{
@@ -37,12 +37,15 @@ componentDidMount() {
 
 sounds = async () => {
 
+  highest = await AsyncStorage.getItem('highest');
+  if(!highest){
+    highest = 0;
+  }
   await score.loadAsync(require('./Components/sound/coin.mp3'));
   await game.loadAsync(require('./Components/sound/gaming.mp3'));
   game.setIsLoopingAsync(true);
   await start.loadAsync(require('./Components/sound/start.mp3'));
   await new_game.loadAsync(require('./Components/sound/new_game.mp3'));
-
 }
 
 
@@ -106,6 +109,7 @@ object = () => {
 event =async (e) => {
 
     if(e.type === "game_over"){
+      AsyncStorage.setItem('highest',highest.toString());
       this.setState({running:false});
       this.setState({stop:true});
       game.stopAsync();
@@ -114,6 +118,10 @@ event =async (e) => {
     if(e.type === "score"){
       this.setState(pre => {return {score:pre.score + 1}});
       score.playFromPositionAsync(0);
+
+      if(this.state.score > highest){
+        highest = this.state.score;
+      }
     }
 }
 
@@ -153,8 +161,11 @@ event =async (e) => {
 <ImageBackground source={require('./Components/img/background.jpeg')} style={{height:'100%',width:'100%'}} blurRadius={1} >
         <View style={{height:'100%',width:'100%',alignItems:'center',justifyContent:'center'}}>
 
+        <View><Text style={{fontSize:40,color:'black'}}>Highest Score</Text></View>
+        <Text style={{fontSize:50,color:'green',marginTop:10,marginBottom:40}}>{highest}</Text>
+
           <View><Text style={{fontSize:40,color:'black'}}>Score</Text></View>
-            <Text style={{fontSize:50,color:'red',marginTop:20,marginBottom:50}}>{this.state.score}</Text>
+            <Text style={{fontSize:50,color:'red',marginTop:10,marginBottom:20}}>{this.state.score}</Text>
            <View >
             <TouchableOpacity onPress={() => this.new_game()}>
             <Image source={require('./Components/img/new_game.png')}  style={{height:100,width:200,resizeMode:'contain'}}/>
